@@ -219,3 +219,6 @@ __marimo__/
 
 # Apple files
 .DS_Store
+
+# Others
+.storage/

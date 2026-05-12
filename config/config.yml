@@ -1,0 +1,4 @@
+# SQLite
+csv_path: data/raw/HousingData.csv
+sqlite_path: .storage/data.db
+sqlite_data_table_name: housing_data
