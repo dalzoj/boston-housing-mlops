@@ -1,0 +1,62 @@
+services:
+  # Almacenamiento MinIO
+  minio:
+    image: minio/minio:latest
+    container_name: mlops-minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Inicialización MinIO:
+  minio-init:
+    image: minio/mc:latest
+    container_name: mlops-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_BUCKET_MLFLOW: mlflow
+      MINIO_BUCKET_ARTIFACTS: artifacts
+      MINIO_BUCKET_PREDICTION_LOGS: prediction-logs
+    entrypoint: ["/bin/sh", "/minio.sh"]
+    volumes:
+      - ./docker/minio.sh:/minio.sh:ro
+
+  # MLflow
+  mlflow:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.mlflow
+    container_name: mlops-mlflow
+    ports:
+      - "5001:5000"
+    environment:
+      AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
+      AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
+      MLFLOW_S3_ENDPOINT_URL: http://minio:9000
+      AWS_DEFAULT_REGION: us-east-1
+    volumes:
+      - mlflow_data:/mlflow
+    depends_on:
+      minio-init:
+        condition: service_completed_successfully
+
+# Volúmenes de persistencia
+volumes:
+  minio_data:
+    name: mlops_minio_data
+  mlflow_data:
+    name: mlops_mlflow_data
