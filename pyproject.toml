@@ -1,0 +1,16 @@
+[project]
+name = "boston-housing-mlops"
+version = "1.0.0"
+description = "Pipeline MLOps integral para el problema de predicción de precios de vivienda en Boston. Arquitectura independiente de la nube basada en herramientas de código abierto y autoalojadas."
+authors = [
+    {name = "Diego Lizarazo ",email = "iimdlizarazo@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.14"
+packages = [
+    {include = "src"}
+]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
