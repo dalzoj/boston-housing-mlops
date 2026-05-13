@@ -18,7 +18,6 @@ class AppConfig(BaseSettings):
         case_sensitive=False,
     )
 
-    print("si")
     # MinIO
     minio_root_user: str
     minio_root_password: str
@@ -29,6 +28,16 @@ class AppConfig(BaseSettings):
 
     # CSV
     csv_path: Path
+
+    # Pipeline
+    random_state: int
+    test_size: float
+
+    # MLFlow
+    mlflow_tracking_uri: str
+
+    # MinIO
+    minio_endpoint: str
 
 
 def _load_yaml() -> dict:

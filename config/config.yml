@@ -2,3 +2,14 @@
 csv_path: data/raw/HousingData.csv
 sqlite_path: .storage/data.db
 sqlite_data_table_name: housing_data
+
+# Pipeline
+random_state: 42
+test_size: 0.2
+
+# MLFlow
+mlflow_tracking_uri: http://localhost:5001
+
+# MinIO
+minio_endpoint: http://localhost:9000
+
