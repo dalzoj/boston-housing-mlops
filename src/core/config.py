@@ -18,6 +18,7 @@ class AppConfig(BaseSettings):
         case_sensitive=False,
     )
 
+    print("si")
     # MinIO
     minio_root_user: str
     minio_root_password: str

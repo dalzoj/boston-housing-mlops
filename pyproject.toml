@@ -13,5 +13,15 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry.dependencies]
 python = ">=3.14"
 pydantic-settings = "^2.14.1"
-pandas = "^3.0.3"
+pandas = "<3"
 pyyaml = "^6.0.3"
+seaborn = "^0.13.2"
+matplotlib = "^3.10.9"
+scikit-learn = "^1.8.0"
+mlflow = "^3.12.0"
+boto3 = "^1.43.6"
+
+[dependency-groups]
+dev = [
+    "ipykernel (>=7.2.0,<8.0.0)"
+]
