@@ -29,7 +29,6 @@ services:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
       MINIO_BUCKET_MLFLOW: mlflow
-      MINIO_BUCKET_ARTIFACTS: artifacts
       MINIO_BUCKET_PREDICTION_LOGS: prediction-logs
     entrypoint: ["/bin/sh", "/minio.sh"]
     volumes:
