@@ -10,6 +10,9 @@ from src.core.config import get_config
 
 logger = logging.getLogger(__name__)
 
+STAGING_ALIAS = "staging"
+PRODUCTION_ALIAS = "production"
+
 
 class MLflowClientWrapper:
     def __init__(self) -> None:
@@ -56,27 +59,31 @@ class MLflowClientWrapper:
         )
         return version
 
-    def transition_to_staging(self, model_name: str, version: str) -> None:
-        self._client.transition_model_version_stage(
+    def set_alias(self, model_name: str, alias: str, version: str) -> None:
+        self._client.set_registered_model_alias(
             name=model_name,
+            alias=alias,
             version=version,
-            stage="Staging",
-            archive_existing_versions=False,
         )
+        logger.info("Modelo '%s' v%s ahora es -> '%s'", model_name, version, alias)
+
+    def promote_to_staging(self, model_name: str, version: str) -> None:
+        self.set_alias(model_name, STAGING_ALIAS, version)
         logger.info("Modelo '%s' v%s promovido a STAGING", model_name, version)
 
-    def transition_to_production(self, model_name: str, version: str) -> None:
-        self._client.transition_model_version_stage(
-            name=model_name,
-            version=version,
-            stage="Production",
-            archive_existing_versions=True,
-        )
+    def promote_to_production(self, model_name: str, version: str) -> None:
+        self.set_alias(model_name, PRODUCTION_ALIAS, version)
         logger.info("Modelo '%s' v%s promovido a PRODUCTION", model_name, version)
 
-    def get_latest_version(self, model_name: str, stage: str) -> ModelVersion | None:
-        versions = self._client.get_latest_versions(model_name, stages=[stage])
-        return versions[0] if versions else None
+    def get_version_by_alias(self, model_name: str, alias: str) -> ModelVersion | None:
+        try:
+            return self._client.get_model_version_by_alias(name=model_name, alias=alias)
+        except mlflow.exceptions.RestException:
+            return None
+
+    def delete_alias(self, model_name: str, alias: str) -> None:
+        self._client.delete_registered_model_alias(name=model_name, alias=alias)
+        logger.info("Alias '%s' eliminado de '%s'", alias, model_name)
 
     def best_run_in_experiment(
         self,

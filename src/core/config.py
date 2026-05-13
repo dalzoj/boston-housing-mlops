@@ -35,6 +35,8 @@ class AppConfig(BaseSettings):
 
     # MLFlow
     mlflow_tracking_uri: str
+    mlflow_experiment_name: str
+    mlflow_model_registry_name: str
 
     # MinIO
     minio_endpoint: str

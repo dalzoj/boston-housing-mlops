@@ -20,6 +20,10 @@ matplotlib = "^3.10.9"
 scikit-learn = "^1.8.0"
 mlflow = "^3.12.0"
 boto3 = "^1.43.6"
+fastapi = "^0.136.1"
+uvicorn = "^0.46.0"
+pydantic = "^2.13.4"
+prometheus-client = "^0.25.0"
 
 [dependency-groups]
 dev = [

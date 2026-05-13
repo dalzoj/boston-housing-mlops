@@ -9,6 +9,8 @@ test_size: 0.2
 
 # MLFlow
 mlflow_tracking_uri: http://localhost:5001
+mlflow_experiment_name: boston-housing
+mlflow_model_registry_name: boston-housing-regressor
 
 # MinIO
 minio_endpoint: http://localhost:9000

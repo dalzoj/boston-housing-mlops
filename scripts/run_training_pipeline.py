@@ -7,10 +7,10 @@ from src.pipeline.trainer import train_and_log
 from src.storage.mlflow_client import MLflowClientWrapper
 
 logger = logging.getLogger(__name__)
+config = get_config()
 
-EXPERIMENT_NAME = "boston-housing"
-MODEL_REGISTRY_NAME = "boston-housing-regressor"
-
+EXPERIMENT_NAME = config.mlflow_experiment_name
+MODEL_REGISTRY_NAME = config.mlflow_model_registry_name
 
 MODEL_CONFIGS = {
     "ridge": {"alpha": 1.0, "random_state": 42},
@@ -25,14 +25,13 @@ MODEL_CONFIGS = {
 
 def main() -> None:
     setup_logging()
-    config = get_config()
     logger.info("Iniciando pipeline de entrenamiento con %s", config.mlflow_tracking_uri)
 
     # Cargar datos
     df = load_data(config.sqlite_path, config.sqlite_data_table_name)
     logger.info("Se han cargado %d elementos desde SQLite", len(df))
 
-    # Asignar MLFlow
+    # Obtener experimento
     mlflow_client = MLflowClientWrapper()
     experiment_id = mlflow_client.get_or_create_experiment(EXPERIMENT_NAME)
 
@@ -42,7 +41,7 @@ def main() -> None:
         result = train_and_log(model_name, params, df, experiment_id)
         results.append(result)
 
-    # elegir el ganador respecto RMSE
+    # Elegir el ganador respecto RMSE
     winner = min(results, key=lambda r: r["metrics"]["rmse"])
     logger.info(
         "Ganador: %s con RMSE=%.4f (run_id=%s)",
@@ -55,10 +54,12 @@ def main() -> None:
         artifact_path="model",
         model_name=MODEL_REGISTRY_NAME,
     )
-    mlflow_client.transition_to_staging(MODEL_REGISTRY_NAME, version.version)
+
+    # Promover modelo
+    mlflow_client.promote_to_staging(MODEL_REGISTRY_NAME, version.version)
 
     logger.info(
-        "Pipeline de entrenamiento completo. Modelo '%s' v%s se encuentra en Stagging",
+        "Pipeline de entrenamiento completo. Modelo '%s' v%s se encuentra en STAGING",
         MODEL_REGISTRY_NAME, version.version,
     )
 
