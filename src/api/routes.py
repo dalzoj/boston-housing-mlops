@@ -32,8 +32,9 @@ async def health() -> HealthResponse:
 async def predict(request: PredictionRequest) -> PredictionResponse:
     try:
         loaded = get_loaded_model()
-    except RuntimeError as e:
+    except Exception as e:
         prediction_errors.labels(error="model_not_loaded").inc()
+        logger.error("No se pudo cargar el modelo: %s", e)
         raise HTTPException(status_code=503, detail=str(e))
 
     row = {col: getattr(request, col) for col in FEATURE_COLUMNS}
@@ -45,7 +46,7 @@ async def predict(request: PredictionRequest) -> PredictionResponse:
         prediction = float(loaded.pipeline.predict(df)[0])
 
     except Exception as e:
-        prediction_errors.labels(error=type(e).__name__).inc()
+        prediction_errors.labels(error="prediction_failed").inc()
         logger.exception("Prediction failed")
         raise HTTPException(status_code=500, detail=f"Prediction failed: {e}")
 

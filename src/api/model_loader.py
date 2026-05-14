@@ -24,8 +24,8 @@ def load_production_model() -> LoadedModel:
     version_info = client.get_version_by_alias(MODEL_REGISTRY_NAME, PRODUCTION_ALIAS)
 
     if version_info is None:
-        raise (
-            f"No se encontró ningún modelo con el alias '{PRODUCTION_ALIAS}' para '{MODEL_REGISTRY_NAME}'."
+        raise RuntimeError(
+            f"No se encontró ningún modelo con el alias '{PRODUCTION_ALIAS}' para '{MODEL_REGISTRY_NAME}'"
         )
 
     model_uri = f"models:/{MODEL_REGISTRY_NAME}@{PRODUCTION_ALIAS}"
