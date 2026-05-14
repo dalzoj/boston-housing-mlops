@@ -15,7 +15,6 @@ class AppConfig(BaseSettings):
         env_file=".env",
         env_file_encoding="utf-8",
         extra="ignore",
-        case_sensitive=False,
     )
 
     # MinIO
@@ -34,12 +33,12 @@ class AppConfig(BaseSettings):
     test_size: float
 
     # MLFlow
-    mlflow_tracking_uri: str
+    mlflow_tracking_uri: str = "http://localhost:5001"
     mlflow_experiment_name: str
     mlflow_model_registry_name: str
 
     # MinIO
-    minio_endpoint: str
+    minio_endpoint: str = "http://localhost:9000"
 
 
 def _load_yaml() -> dict:
