@@ -1,17 +1,23 @@
 import logging
 import sqlite3
+import argparse
 from pathlib import Path
 
 import pandas as pd
+from sdv.metadata import Metadata
+from sdv.single_table import GaussianCopulaSynthesizer
 
 from src.core.config import get_config
 from src.core.logging import setup_logging
 
 
 logger = logging.getLogger(__name__)
+setup_logging()
+config = get_config()
+
 
 CREATE_TABLE_SQL = f"""
-    CREATE TABLE IF NOT EXISTS {get_config().sqlite_data_table_name} (
+    CREATE TABLE IF NOT EXISTS {config.sqlite_data_table_name} (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         crim REAL,
         zn REAL,
@@ -47,10 +53,17 @@ def load_csv(path: Path) -> pd.DataFrame:
     return df
 
 
+def drop_nulls(df: pd.DataFrame) -> pd.DataFrame:
+    before = len(df)
+    df = df.dropna().reset_index(drop=True)
+    logger.info("Eliminadas %d filas con NaN", before-len(df))
+    return df
+
+
 def migrate(df: pd.DataFrame, db_path: Path) -> None:
     db_path.parent.mkdir(parents=True, exist_ok=True)
 
-    sqllite_table_name = get_config().sqlite_data_table_name
+    sqllite_table_name = config.sqlite_data_table_name
 
     with sqlite3.connect(db_path) as conn:
         conn.execute(f"DROP TABLE IF EXISTS {sqllite_table_name}")
@@ -61,16 +74,57 @@ def migrate(df: pd.DataFrame, db_path: Path) -> None:
     logger.info("Insertando %d elementos en %s::%s", count, db_path, sqllite_table_name)
 
 
+def get_augmented_data(
+    df: pd.DataFrame,
+    news_items: int,
+) -> pd.DataFrame:
+
+    metadata = Metadata.detect_from_dataframe(df)
+
+    synthesizer = GaussianCopulaSynthesizer(
+        metadata,
+        enforce_min_max_values=True,
+        enforce_rounding=True,
+    )
+    synthesizer.fit(df)
+
+    synthetic = synthesizer.sample(num_rows=news_items)
+
+    logger.info("Data Augmentation: %d filas sintéticas generadas.", news_items)
+    return synthetic
+
+
 def main() -> None:
-    setup_logging()
+
+    parser = argparse.ArgumentParser( description="Migra CSV a SQLite." )
+    parser.add_argument(
+        "--new_elements",
+        type=int,
+        default=0,
+        help="Generar elementos sinéticos",
+    )
+    args = parser.parse_args()
+
 
     logger.info("Iniciando migración de DATA a SQLITE.")
 
-    csv_path = Path(get_config().csv_path)
-    sqlite_path = Path(get_config().sqlite_path)
+    csv_path = Path(config.csv_path)
+    sqlite_path = Path(config.sqlite_path)
 
     if check_csv_file(csv_path):
         df = load_csv(csv_path)
+        df = drop_nulls(df)
+
+        if args.new_elements > 0:
+
+            synthetic_df = get_augmented_data(
+                df=df,
+                news_items=args.new_elements,
+            )
+            df = pd.concat([df, synthetic_df], ignore_index=True)
+
+            logger.info("Se han generado %d filas", len(df))
+
         migrate(df, sqlite_path)
 
     logger.info("Migración completa. SQLite en: %s", sqlite_path)
