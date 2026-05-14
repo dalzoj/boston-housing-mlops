@@ -47,11 +47,31 @@ services:
       AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
       MLFLOW_S3_ENDPOINT_URL: http://minio:9000
       AWS_DEFAULT_REGION: us-east-1
+      MLFLOW_SERVER_ALLOWED_HOSTS: "mlflow:5000,localhost:5000,localhost:5001,localhost"
     volumes:
       - mlflow_data:/mlflow
     depends_on:
       minio-init:
         condition: service_completed_successfully
+
+
+  # FastAPI
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    container_name: mlops-api
+    ports:
+      - "8000:8000"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      AWS_DEFAULT_REGION: us-east-1
+      MINIO_ENDPOINT: http://minio:9000
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+    depends_on:
+      mlflow:
+        condition: service_started
 
 # Volúmenes de persistencia
 volumes:
@@ -59,3 +79,4 @@ volumes:
     name: mlops_minio_data
   mlflow_data:
     name: mlops_mlflow_data
+
