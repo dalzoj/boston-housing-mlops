@@ -16,3 +16,4 @@ minio_bucket_prediction_logs: prediction-logs
 
 # Others
 drift_ks_threshold: 0.05
+min_rmse_improvement: 0.1  # En unidades del target (miles)

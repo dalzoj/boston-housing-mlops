@@ -39,6 +39,10 @@ class AppConfig(BaseSettings):
     mlflow_experiment_name: str
     mlflow_model_registry_name: str
 
+    # Others
+    drift_ks_threshold: float = 0.05
+    min_rmse_improvement: float = 0.1
+
 
 def _load_yaml() -> dict:
     with open("config/config.yml", "r") as f:

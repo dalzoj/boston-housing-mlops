@@ -24,6 +24,7 @@ fastapi = "^0.136.1"
 uvicorn = "^0.46.0"
 pydantic = "^2.13.4"
 prometheus-client = "^0.25.0"
+scipy = "^1.17.1"
 
 [dependency-groups]
 dev = [

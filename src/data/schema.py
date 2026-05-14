@@ -17,3 +17,5 @@ FEATURE_COLUMNS: list[str] = [
 TARGET_COLUMN = "medv"
 
 ALL_COLUMNS: list[str] = FEATURE_COLUMNS + [TARGET_COLUMN]
+
+NON_HYPERPARAMS = "test_size"

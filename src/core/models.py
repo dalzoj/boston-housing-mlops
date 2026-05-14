@@ -1,5 +1,5 @@
-from typing import Any
 from pydantic import BaseModel
+from typing import Any, List
 
 
 class CheckResult(BaseModel):
@@ -7,6 +7,7 @@ class CheckResult(BaseModel):
     passed: bool
     detail: str = ""
 
+# Entrenamiento
 
 class IntegrationReport(BaseModel):
     model_name: str
@@ -15,6 +16,8 @@ class IntegrationReport(BaseModel):
     all_passed: bool
     checks: list[CheckResult] = []
 
+
+# API
 
 class LoadedModel(BaseModel):
     pipeline: Any
@@ -26,6 +29,8 @@ class HealthResponse(BaseModel):
     code: int
     content: str
 
+
+# Predicciones
 
 class PredictionRequest(BaseModel):
     crim: float | None = None
@@ -67,3 +72,27 @@ class PredictionResponse(BaseModel):
     prediction: float
     model_name: str
     model_version: str
+
+
+# Drift
+
+class FeatureDriftResult(BaseModel):
+    feature: str
+    statistic: float
+    p_value: float
+    drifted: bool
+
+
+class DriftReport(BaseModel):
+    drifted: bool
+    threshold: float
+    per_feature: List[FeatureDriftResult]
+    n_reference: int
+    n_current: int
+
+    def drifted_features(self) -> list[str]:
+        return [
+            r.feature
+            for r in self.per_feature
+            if r.drifted
+        ]

@@ -27,8 +27,11 @@ class MinioClient:
         logger.debug("MinioClient inicializado en %s", config.minio_endpoint)
 
     def list_objects(self, bucket: str, prefix: str = "") -> list[str]:
+
         keys: list[str] = []
+
         paginator = self._client.get_paginator("list_objects_v2")
+
         for page in paginator.paginate(Bucket=bucket, Prefix=prefix):
             for obj in page.get("Contents", []):
                 keys.append(obj["Key"])
@@ -40,11 +43,14 @@ class MinioClient:
         return json.loads(response["Body"].read())
 
     def download_jsons_as_dataframe(self, bucket: str, prefix: str) -> pd.DataFrame:
+
         keys = self.list_objects(bucket, prefix)
+
         if not keys:
             return pd.DataFrame()
 
         records = []
+
         for key in keys:
             try:
                 records.append(self.download_json(bucket, key))

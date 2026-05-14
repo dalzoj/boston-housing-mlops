@@ -1,7 +1,6 @@
 import json
 import logging
 from pathlib import Path
-from dataclasses import asdict
 
 import mlflow
 import mlflow.sklearn
@@ -11,11 +10,13 @@ from src.core.config import get_config
 from src.data.repository import load_data
 from src.data.schema import FEATURE_COLUMNS
 from src.core.models import IntegrationReport, CheckResult
+from src.storage.mlflow_client import MLflowClientWrapper
 
 logger = logging.getLogger(__name__)
-
+config = get_config()
 
 SAMPLE_SIZE = 50
+MIN_RMSE_IMPROVEMENT = config.min_rmse_improvement
 
 
 def _check_deserialization(model_uri: str) -> tuple[dict, object | None]:
@@ -51,8 +52,55 @@ def _check_schema(model, sample_df: pd.DataFrame) -> dict:
             detail=str(e),
         )
 
+
+def _check_champion_challenger(
+    model_name: str,
+    challenger_run_id: str,
+) -> CheckResult:
+
+    client = MLflowClientWrapper()
+
+    # Caso base: Si no hay modelo en prodicción
+    champion = client.get_version_by_alias(model_name, "production")
+    if champion is None:
+        return CheckResult(
+            name="champion_challenger",
+            passed=True,
+            detail="Sin modelo Champlio. Challenger promovio",
+        )
+
+    # Realizar comparatidos entre Champio y Challenger
+    champion_run = client._client.get_run(champion.run_id)
+    challenger_run = client._client.get_run(challenger_run_id)
+
+    champion_rmse = champion_run.data.metrics.get("rmse")
+    challenger_rmse = challenger_run.data.metrics.get("rmse")
+
+    improvement = champion_rmse - challenger_rmse
+
+    if improvement >= MIN_RMSE_IMPROVEMENT:
+        return CheckResult(
+            name="champion_challenger",
+            passed=True,
+            detail=(
+                f"Challenger RMSE: {challenger_rmse:.4f} - Champion RMSE: {champion_rmse:.4f} | "
+                f"Requerido (MIN_RMSE_IMPROVEMENT) -> >={MIN_RMSE_IMPROVEMENT}) | "
+                f"Challenger GANA"
+            ),
+        )
+
+    return CheckResult(
+        name="champion_challenger",
+        passed=False,
+        detail=(
+            f"Challenger RMSE: {challenger_rmse:.4f} - Champion RMSE: {champion_rmse:.4f} | "
+            f"Requerido (MIN_RMSE_IMPROVEMENT) -> >={MIN_RMSE_IMPROVEMENT}) | "
+            f"Challenger NO GANA"
+        ),
+    )
+
+
 def run_integration_tests(model_name: str, version: str, run_id: str) -> IntegrationReport:
-    config = get_config()
     model_uri = f"models:/{model_name}/{version}"
 
     logger.info("Corriendo test de integración de %s v%s (run_id=%s)", model_name, version, run_id)
@@ -76,6 +124,10 @@ def run_integration_tests(model_name: str, version: str, run_id: str) -> Integra
     schema_result = _check_schema(model, df)
     report.checks.append(schema_result)
 
+    # Comparación Challenger - Champion
+    cc_result = _check_champion_challenger(model_name, run_id)
+    report.checks.append(cc_result)
+
     report.all_passed = all(c.passed for c in report.checks)
 
     for check in report.checks:
@@ -87,7 +139,7 @@ def run_integration_tests(model_name: str, version: str, run_id: str) -> Integra
 
 def save_rejection_report(report: IntegrationReport, run_id: str) -> Path:
     rejection_path = Path(f"/tmp/rejection_report_{run_id}.json")
-    rejection_path.write_text(json.dumps(asdict(report), indent=2))
+    rejection_path.write_text(json.dumps(report.model_dump(), indent=2))
 
     with mlflow.start_run(run_id=run_id):
         mlflow.log_artifact(str(rejection_path), artifact_path="validation")

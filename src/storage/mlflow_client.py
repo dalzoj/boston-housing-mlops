@@ -81,6 +81,9 @@ class MLflowClientWrapper:
         except mlflow.exceptions.RestException:
             return None
 
+    def get_run(self, run_id: str):
+        return self._client.get_run(run_id)
+
     def delete_alias(self, model_name: str, alias: str) -> None:
         self._client.delete_registered_model_alias(name=model_name, alias=alias)
         logger.info("Alias '%s' eliminado de '%s'", alias, model_name)
