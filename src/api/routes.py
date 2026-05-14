@@ -7,7 +7,7 @@ from fastapi.responses import Response
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 
 from src.api.metrics import prediction_counter, prediction_errors, prediction_latency
-from src.api.model_loader import get_loaded_model
+from src.api.model_loader import get_loaded_model, reload_production_model
 from src.core.models import HealthResponse, PredictionRequest, PredictionResponse
 from src.data.schema import FEATURE_COLUMNS
 
@@ -63,6 +63,12 @@ async def predict(request: PredictionRequest) -> PredictionResponse:
         model_name=loaded.name,
         model_version=loaded.version,
     )
+
+
+@router.post("/admin/reload")
+async def reload():
+    loaded = reload_production_model()
+    return {"reloaded": True, "version": loaded.version}
 
 
 @router.get("/metrics")

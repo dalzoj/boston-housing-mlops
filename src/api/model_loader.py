@@ -41,6 +41,13 @@ def load_production_model() -> LoadedModel:
     return loaded_model
 
 
+def reload_production_model() -> LoadedModel:
+    global _loaded_model
+    with _lock:
+        _loaded_model = load_production_model()
+    return _loaded_model
+
+
 def get_loaded_model() -> LoadedModel:
     global _loaded_model
     if _loaded_model is None:

@@ -5,6 +5,7 @@ import mlflow
 import mlflow.sklearn
 import numpy as np
 import pandas as pd
+from mlflow.models import infer_signature
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
@@ -58,6 +59,10 @@ def train_and_log(
 
         pipeline.fit(X_train, y_train)
 
+        input_example = X_train.iloc[:3]
+        y_pred_example = pd.Series(pipeline.predict(input_example), name=TARGET_COLUMN)
+        signature = infer_signature(input_example, y_pred_example)
+
         metrics = evaluate(pipeline, X_test, y_test)
         mlflow.log_metrics(metrics)
 
@@ -65,6 +70,7 @@ def train_and_log(
             sk_model=pipeline,
             artifact_path="model",
             input_example=X_train.iloc[:3],
+            signature=signature,
         )
 
         run_id = run.info.run_id

@@ -40,6 +40,7 @@ def get_pipeline(name: str, model_params: dict[str, Any] | None = None) -> BaseR
         raise ValueError(
             f"Pipeline desconocido'{name}'. Disponibles: {list(PIPELINE_REGISTRY.keys())}"
         )
+    logger.info("Se ha generado el pipeline de '%s'",name)
     return PIPELINE_REGISTRY[name](model_params=model_params)
 
 
