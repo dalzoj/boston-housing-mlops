@@ -20,6 +20,8 @@ class AppConfig(BaseSettings):
     # MinIO
     minio_root_user: str
     minio_root_password: str
+    minio_endpoint: str = "http://localhost:9000"
+    minio_bucket_prediction_logs: str
 
     # SQLite
     sqlite_path: Path
@@ -36,9 +38,6 @@ class AppConfig(BaseSettings):
     mlflow_tracking_uri: str = "http://localhost:5001"
     mlflow_experiment_name: str
     mlflow_model_registry_name: str
-
-    # MinIO
-    minio_endpoint: str = "http://localhost:9000"
 
 
 def _load_yaml() -> dict:

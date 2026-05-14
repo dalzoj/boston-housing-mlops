@@ -10,3 +10,9 @@ test_size: 0.2
 # MLFlow
 mlflow_experiment_name: boston-housing
 mlflow_model_registry_name: boston-housing-regressor
+
+# Minio
+minio_bucket_prediction_logs: prediction-logs
+
+# Others
+drift_ks_threshold: 0.05

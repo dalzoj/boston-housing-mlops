@@ -10,14 +10,14 @@ from src.core.config import get_config
 
 logger = logging.getLogger(__name__)
 
+config = get_config()
+
 STAGING_ALIAS = "staging"
 PRODUCTION_ALIAS = "production"
 
 
 class MLflowClientWrapper:
     def __init__(self) -> None:
-        config = get_config()
-
         os.environ["AWS_ACCESS_KEY_ID"] = config.minio_root_user
         os.environ["AWS_SECRET_ACCESS_KEY"] = config.minio_root_password
         os.environ["MLFLOW_S3_ENDPOINT_URL"] = config.minio_endpoint
