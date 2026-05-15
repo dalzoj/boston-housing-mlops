@@ -36,7 +36,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "sum(rate(predictions_check_total[1m])) by (model_version)",
+          "expr": "sum(rate(predictions_total[1m])) by (model_version)",
           "legendFormat": "v{{model_version}}",
           "refId": "A"
         }
@@ -117,7 +117,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "sum(predictions_check_total)",
+          "expr": "sum(predictions_total)",
           "refId": "A"
         }
       ],

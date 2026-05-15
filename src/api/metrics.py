@@ -1,7 +1,7 @@
 from prometheus_client import Counter, Histogram, Info
 
 prediction_counter = Counter(
-    "predictions_check_total",
+    "predictions_total",
     "Número total de predicciones atendidas",
     labelnames=["model_name", "model_version"],
 )
