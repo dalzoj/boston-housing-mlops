@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Any, List
+from typing import Any, List, Optional
 
 
 class CheckResult(BaseModel):
@@ -28,6 +28,8 @@ class LoadedModel(BaseModel):
 class HealthResponse(BaseModel):
     code: int
     content: str
+    model_name: Optional[str] = None
+    model_version: Optional[str] = None
 
 
 # Predicciones

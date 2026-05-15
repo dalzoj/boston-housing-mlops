@@ -19,13 +19,22 @@ router = APIRouter()
 @router.get("/health", response_model=HealthResponse)
 async def health() -> HealthResponse:
     try:
+        loaded = get_loaded_model()
         return HealthResponse(
             code=200,
             content="OK",
+            model_name=loaded.name,
+            model_version=loaded.version,
         )
+
     except Exception as e:
-        logger.error("API no funcionando: %s", e)
-        return HealthResponse(status=500, content="ERROR")
+        logger.error("API no funciona: %s", e)
+        return HealthResponse(
+            code=500,
+            content="ERROR",
+            model_name=None,
+            model_version=None,
+        )
 
 
 @router.post("/predict", response_model=PredictionResponse)
