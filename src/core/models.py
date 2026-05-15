@@ -33,19 +33,19 @@ class HealthResponse(BaseModel):
 # Predicciones
 
 class PredictionRequest(BaseModel):
-    crim: float | None = None
-    zn: float | None = None
-    indus: float | None = None
-    chas: float | None = None
-    nox: float | None = None
-    rm: float | None = None
-    age: float | None = None
-    dis: float | None = None
-    rad: float | None = None
-    tax: float | None = None
-    ptratio: float | None = None
-    b: float | None = None
-    lstat: float | None = None
+    crim: float
+    zn: float
+    indus: float
+    chas: float
+    nox: float
+    rm: float
+    age: float
+    dis: float
+    rad: float
+    tax: float
+    ptratio: float
+    b: float
+    lstat: float
 
     model_config = {
         "json_schema_extra": {

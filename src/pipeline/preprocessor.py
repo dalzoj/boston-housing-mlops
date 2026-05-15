@@ -1,7 +1,6 @@
 import logging
 
 from sklearn.compose import ColumnTransformer
-from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
@@ -14,7 +13,6 @@ def build_preprocessor() -> ColumnTransformer:
     logger.debug("Construyendo preprocesador para %d características", len(FEATURE_COLUMNS))
 
     numeric_pipeline = Pipeline(steps=[
-        ("imputer", SimpleImputer(strategy="median")),
         ("scaler", StandardScaler()),
     ])
 
