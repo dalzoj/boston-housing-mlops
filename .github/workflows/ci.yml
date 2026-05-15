@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint-and-test:
+    name: Lint y tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar Poetry
+        run: pipx install poetry
+
+      - name: Instalar dependencias
+        run: poetry install --no-interaction
+
+      - name: Revisar formato con Ruff
+        run: poetry run ruff format --check .
+
+      - name: Revisar identación con Ruff
+        run: poetry run ruff check .
+
+      - name: Correr tests
+        run: poetry run pytest tests/ -v
