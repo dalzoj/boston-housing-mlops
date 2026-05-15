@@ -18,4 +18,10 @@ TARGET_COLUMN = "medv"
 
 ALL_COLUMNS: list[str] = FEATURE_COLUMNS + [TARGET_COLUMN]
 
-NON_HYPERPARAMS = "test_size"
+NON_HYPERPARAMS = {
+    "test_size",
+    "training_strategy",
+    "optuna_n_trials",
+    "optuna_seed",
+    "inherited_from_version",
+}

@@ -43,7 +43,7 @@ def inherit_strategy(df: pd.DataFrame, experiment_id: str) -> list[dict[str, Any
         model_params=hyperparams,
         df=df,
         experiment_id=experiment_id,
-        extra_params={
+        extra_tags={
             "training_strategy": "inherit",
             "inherited_from_version": prod.version,
         },
@@ -73,7 +73,7 @@ def fixed_strategy(df: pd.DataFrame, experiment_id: str) -> list[dict[str, Any]]
             model_params=params,
             df=df,
             experiment_id=experiment_id,
-            extra_params={"training_strategy": "fixed"},
+            extra_tags={"training_strategy": "fixed"},
             extra_artifacts=[FIXED_CONFIG_PATH],
         )
         for name, params in hiperparams_config["models"].items()
@@ -98,7 +98,7 @@ def search_strategy(df: pd.DataFrame, experiment_id: str) -> list[dict[str, Any]
             model_params=best_params,
             df=df,
             experiment_id=experiment_id,
-            extra_params={
+            extra_tags={
                 "training_strategy": "search",
                 "optuna_n_trials": hiperparams_config["n_trials"],
                 "optuna_seed": hiperparams_config["seed"],

@@ -9,11 +9,9 @@ from src.mlops.promotion import promote_if_valid
 from src.mlops.retrain import retrain
 from src.storage.minio_client import MinioClient
 
-
 logger = logging.getLogger(__name__)
-setup_logging()
 config = get_config()
-
+setup_logging()
 
 
 def main():

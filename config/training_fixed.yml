@@ -1,0 +1,11 @@
+models:
+
+  ridge:
+    alpha: 1.0
+    random_state: 42
+
+  gradient_boosting:
+    n_estimators: 200
+    max_depth: 4
+    learning_rate: 0.05
+    random_state: 42

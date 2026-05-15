@@ -43,7 +43,7 @@ def train_and_log(
     model_params: dict[str, Any],
     df: pd.DataFrame,
     experiment_id: str,
-    extra_params: dict[str, Any] | None = None,
+    extra_tags: dict[str, Any] | None = None,
     extra_artifacts: list[Path] | None = None,
 ) -> dict[str, Any]:
     logger.info("Entrenando %s con parámetros=%s", model_name, model_params)
@@ -60,8 +60,8 @@ def train_and_log(
         mlflow.log_param("random_state", RANDOM_STATE)
         mlflow.log_param("test_size", TEST_SIZE)
 
-        if extra_params:
-            mlflow.log_params(extra_params)
+        if extra_tags:
+            mlflow.set_tags(extra_tags)
 
         pipeline.fit(X_train, y_train)
 
