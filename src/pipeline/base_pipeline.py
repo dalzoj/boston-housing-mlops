@@ -1,6 +1,6 @@
 import logging
-from typing import Any
 from abc import ABC, abstractmethod
+from typing import Any
 
 from sklearn.base import BaseEstimator
 from sklearn.compose import ColumnTransformer
@@ -16,7 +16,11 @@ class BaseRegressionPipeline(ABC):
         self.model_params: dict[str, Any] = model_params or {}
 
     def build(self) -> Pipeline:
-        logger.debug("Construyendo %s pipeline con parámetros=%s", self.model_name, self.model_params)
+        logger.debug(
+            "Construyendo %s pipeline con parámetros=%s",
+            self.model_name,
+            self.model_params,
+        )
         return Pipeline(
             steps=[
                 ("preprocessor", self._create_preprocessor()),

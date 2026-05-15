@@ -17,7 +17,9 @@ MODEL_REGISTRY_NAME = config.mlflow_model_registry_name
 def main() -> None:
     setup_logging()
 
-    parser = argparse.ArgumentParser(description="Pipeline de entrenamiento. Tres estrategias para elegir hiperparámetros")
+    parser = argparse.ArgumentParser(
+        description="Pipeline de entrenamiento. Tres estrategias para elegir hiperparámetros"
+    )
     parser.add_argument(
         "--type",
         choices=list(STRATEGY_REGISTRY.keys()),
@@ -26,7 +28,11 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    logger.info("Iniciando pipeline de entrenamiento (Estrategia=%s) en %s", args.type, config.mlflow_tracking_uri)
+    logger.info(
+        "Iniciando pipeline de entrenamiento (Estrategia=%s) en %s",
+        args.type,
+        config.mlflow_tracking_uri,
+    )
 
     # Cargar datos
     df = load_data(config.sqlite_path, config.sqlite_data_table_name)
@@ -44,20 +50,23 @@ def main() -> None:
     winner = min(results, key=lambda r: r["metrics"]["rmse"])
     logger.info(
         "Ganador: %s con RMSE=%.4f (run_id=%s)",
-        winner["model_name"], winner["metrics"]["rmse"], winner["run_id"],
+        winner["model_name"],
+        winner["metrics"]["rmse"],
+        winner["run_id"],
     )
 
     # Registrar y promover a Staging
     version = mlflow_client.register_model(
         run_id=winner["run_id"],
-        artifact_path="model",
+        name="model",
         model_name=MODEL_REGISTRY_NAME,
     )
     mlflow_client.promote_to_staging(MODEL_REGISTRY_NAME, version.version)
 
     logger.info(
         "Pipeline completo. Modelo '%s' v%s en STAGING",
-        MODEL_REGISTRY_NAME, version.version,
+        MODEL_REGISTRY_NAME,
+        version.version,
     )
 
 

@@ -1,7 +1,7 @@
-import logging
-import warnings
-import sqlite3
 import argparse
+import logging
+import sqlite3
+import warnings
 from pathlib import Path
 
 import pandas as pd
@@ -10,7 +10,6 @@ from copulas.multivariate import GaussianMultivariate
 from src.core.config import get_config
 from src.core.logging import setup_logging
 from src.data.schema import FEATURE_COLUMNS, TARGET_COLUMN
-
 
 logger = logging.getLogger(__name__)
 setup_logging()
@@ -49,7 +48,7 @@ def check_csv_file(path: Path) -> bool:
 
 def load_csv(path: Path) -> pd.DataFrame:
     df = pd.read_csv(path)
-    logger.info("Cargado %d filas y %d columns", len(df), len(df.columns))
+    logger.info("Cargado %d filas y %d columnas", len(df), len(df.columns))
     logger.debug("Columnas: %s", list(df.columns))
     return df
 
@@ -57,22 +56,25 @@ def load_csv(path: Path) -> pd.DataFrame:
 def drop_nulls(df: pd.DataFrame) -> pd.DataFrame:
     before = len(df)
     df = df.dropna().reset_index(drop=True)
-    logger.info("Eliminadas %d filas con NaN", before-len(df))
+    logger.info("Eliminadas %d filas con NaN", before - len(df))
     return df
 
 
 def migrate(df: pd.DataFrame, db_path: Path) -> None:
     db_path.parent.mkdir(parents=True, exist_ok=True)
 
-    sqllite_table_name = config.sqlite_data_table_name
-
     with sqlite3.connect(db_path) as conn:
-        conn.execute(f"DROP TABLE IF EXISTS {sqllite_table_name}")
+        conn.execute(f"DROP TABLE IF EXISTS {config.sqlite_data_table_name}")
         conn.executescript(CREATE_TABLE_SQL)
-        df.to_sql(sqllite_table_name, conn, if_exists="append", index=False)
-        count = conn.execute(f"SELECT COUNT(*) FROM {sqllite_table_name}").fetchone()[0]
+        df.to_sql(config.sqlite_data_table_name, conn, if_exists="append", index=False)
+        count = conn.execute(f"SELECT COUNT(*) FROM {config.sqlite_data_table_name}").fetchone()[0]
 
-    logger.info("Insertando %d elementos en %s::%s", count, db_path, sqllite_table_name)
+    logger.info(
+        "Insertando %d elementos en %s::%s",
+        count,
+        db_path,
+        config.sqlite_data_table_name,
+    )
 
 
 def get_augmented_data(
@@ -95,15 +97,14 @@ def get_augmented_data(
 
 def main() -> None:
 
-    parser = argparse.ArgumentParser( description="Migra CSV a SQLite." )
+    parser = argparse.ArgumentParser(description="Migra CSV a SQLite.")
     parser.add_argument(
         "--new_elements",
         type=int,
         default=0,
-        help="Generar elementos sinéticos",
+        help="Generar elementos sintéticos",
     )
     args = parser.parse_args()
-
 
     logger.info("Iniciando migración de DATA a SQLITE.")
 
@@ -116,7 +117,6 @@ def main() -> None:
         df.columns = df.columns.str.lower()
 
         if args.new_elements > 0:
-
             synthetic_df = get_augmented_data(
                 df=df,
                 news_items=args.new_elements,

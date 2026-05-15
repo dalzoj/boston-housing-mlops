@@ -7,7 +7,6 @@ from sklearn.linear_model import Ridge
 
 from src.pipeline.base_pipeline import BaseRegressionPipeline
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -38,9 +37,9 @@ PIPELINE_REGISTRY: dict[str, type[BaseRegressionPipeline]] = {
 def get_pipeline(name: str, model_params: dict[str, Any] | None = None) -> BaseRegressionPipeline:
     if name not in PIPELINE_REGISTRY:
         raise ValueError(
-            f"Pipeline desconocido'{name}'. Disponibles: {list(PIPELINE_REGISTRY.keys())}"
+            f"Pipeline desconocido '{name}'. Disponibles: {list(PIPELINE_REGISTRY.keys())}"
         )
-    logger.info("Se ha generado el pipeline de '%s'",name)
+    logger.info("Se ha generado el pipeline de '%s'", name)
     return PIPELINE_REGISTRY[name](model_params=model_params)
 
 

@@ -7,7 +7,6 @@ from src.core.config import get_config
 from src.core.models import LoadedModel
 from src.storage.mlflow_client import MLflowClientWrapper
 
-
 logger = logging.getLogger(__name__)
 config = get_config()
 

@@ -1,15 +1,16 @@
 import json
 import logging
 from pathlib import Path
+from typing import Any
 
 import mlflow
 import mlflow.sklearn
 import pandas as pd
 
 from src.core.config import get_config
+from src.core.models import CheckResult, IntegrationReport
 from src.data.repository import load_data
 from src.data.schema import FEATURE_COLUMNS
-from src.core.models import IntegrationReport, CheckResult
 from src.storage.mlflow_client import MLflowClientWrapper
 
 logger = logging.getLogger(__name__)
@@ -19,12 +20,16 @@ SAMPLE_SIZE = 50
 MIN_RMSE_IMPROVEMENT = config.min_rmse_improvement
 
 
-def _check_deserialization(model_uri: str) -> tuple[dict, object | None]:
+def _check_deserialization(model_uri: str) -> tuple[CheckResult, Any | None]:
     try:
         model = mlflow.sklearn.load_model(model_uri)
 
         return (
-            CheckResult(name="deserialization", passed=True, detail="Modelo cargado correctamente"),
+            CheckResult(
+                name="deserialization",
+                passed=True,
+                detail="Modelo cargado correctamente",
+            ),
             model,
         )
 
@@ -60,16 +65,16 @@ def _check_champion_challenger(
 
     client = MLflowClientWrapper()
 
-    # Caso base: Si no hay modelo en prodicción
+    # Caso base: Si no hay modelo en producción
     champion = client.get_version_by_alias(model_name, "production")
     if champion is None:
         return CheckResult(
             name="champion_challenger",
             passed=True,
-            detail="Sin modelo Champlio. Challenger promovio",
+            detail="Sin modelo Champion. Challenger promovido",
         )
 
-    # Realizar comparatidos entre Champio y Challenger
+    # Realizar comparativos entre Champion y Challenger
     champion_run = client._client.get_run(champion.run_id)
     challenger_run = client._client.get_run(challenger_run_id)
 
@@ -103,7 +108,12 @@ def _check_champion_challenger(
 def run_integration_tests(model_name: str, version: str, run_id: str) -> IntegrationReport:
     model_uri = f"models:/{model_name}/{version}"
 
-    logger.info("Corriendo test de integración de %s v%s (run_id=%s)", model_name, version, run_id)
+    logger.info(
+        "Corriendo test de integración de %s v%s (run_id=%s)",
+        model_name,
+        version,
+        run_id,
+    )
 
     report = IntegrationReport(
         model_name=model_name,
@@ -132,7 +142,7 @@ def run_integration_tests(model_name: str, version: str, run_id: str) -> Integra
 
     for check in report.checks:
         status = "YES" if check.passed else "NO"
-        logger.info( "  [%s] %s: %s", status, check.name, check.detail)
+        logger.info("  [%s] %s: %s", status, check.name, check.detail)
 
     return report
 
@@ -144,5 +154,5 @@ def save_rejection_report(report: IntegrationReport, run_id: str) -> Path:
     with mlflow.start_run(run_id=run_id):
         mlflow.log_artifact(str(rejection_path), artifact_path="validation")
 
-    logger.warning("Reporte de expulsión MLFLow. (run_id: %s)", run_id)
+    logger.warning("Reporte de rejection MLFLow. (run_id: %s)", run_id)
     return rejection_path

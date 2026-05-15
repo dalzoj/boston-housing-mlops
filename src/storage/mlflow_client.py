@@ -48,14 +48,16 @@ class MLflowClientWrapper:
     def register_model(
         self,
         run_id: str,
-        artifact_path: str,
+        name: str,
         model_name: str,
     ) -> ModelVersion:
-        model_uri = f"runs:/{run_id}/{artifact_path}"
+        model_uri = f"runs:/{run_id}/{name}"
         version = mlflow.register_model(model_uri=model_uri, name=model_name)
         logger.info(
             "Registro de modelo '%s' version %s del run %s",
-            model_name, version.version, run_id,
+            model_name,
+            version.version,
+            run_id,
         )
         return version
 

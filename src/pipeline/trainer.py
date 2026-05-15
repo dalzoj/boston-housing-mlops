@@ -11,15 +11,16 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 
+from src.core.config import get_config
 from src.data.schema import FEATURE_COLUMNS, TARGET_COLUMN
 from src.pipeline.concrete_pipeline import get_pipeline
-from src.core.config import get_config
 
 logger = logging.getLogger(__name__)
 config = get_config()
 
 RANDOM_STATE = config.random_state
 TEST_SIZE = config.test_size
+
 
 def split_data(df: pd.DataFrame):
     X = df[FEATURE_COLUMNS]
@@ -74,8 +75,8 @@ def train_and_log(
 
         mlflow.sklearn.log_model(
             sk_model=pipeline,
-            artifact_path="model",
-            input_example=X_train.iloc[:3],
+            name="model",
+            input_example=input_example,
             signature=signature,
         )
 

@@ -11,8 +11,8 @@ from src.core.config import get_config
 logger = logging.getLogger(__name__)
 config = get_config()
 
-class MinioClient:
 
+class MinioClient:
     def __init__(self) -> None:
 
         self._client = boto3.client(
@@ -57,7 +57,12 @@ class MinioClient:
             except Exception as e:
                 logger.warning("No se pudo leer %s/%s: %s", bucket, key, e)
 
-        logger.info("Descargados %d registros de predicciones desde %s/%s", len(records), bucket, prefix)
+        logger.info(
+            "Descargados %d registros de predicciones desde %s/%s",
+            len(records),
+            bucket,
+            prefix,
+        )
         return pd.DataFrame(records)
 
     def upload_json(self, bucket: str, key: str, payload: dict[str, Any]) -> None:

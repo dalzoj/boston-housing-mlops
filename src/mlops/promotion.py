@@ -1,8 +1,8 @@
 import logging
 
 from src.core.models import IntegrationReport
-from src.storage.mlflow_client import MLflowClientWrapper
 from src.mlops.integration import run_integration_tests, save_rejection_report
+from src.storage.mlflow_client import MLflowClientWrapper
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +18,9 @@ def promote_if_valid(model_name: str) -> tuple[bool, IntegrationReport | None]:
 
     logger.info(
         "Modelo candidato encontrado: %s v%s (run_id=%s)",
-        model_name, staging_version.version, staging_version.run_id,
+        model_name,
+        staging_version.version,
+        staging_version.run_id,
     )
 
     # Correr el test de integración
@@ -36,6 +38,8 @@ def promote_if_valid(model_name: str) -> tuple[bool, IntegrationReport | None]:
     save_rejection_report(report, staging_version.run_id)
     logger.error(
         "Modelo %s v%s expulsado. Ver detalles (run_id: %s).",
-        model_name, staging_version.version, staging_version.run_id,
+        model_name,
+        staging_version.version,
+        staging_version.run_id,
     )
     return False, report

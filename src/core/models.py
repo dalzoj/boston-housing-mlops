@@ -1,5 +1,6 @@
+from typing import Any
+
 from pydantic import BaseModel
-from typing import Any, List, Optional
 
 
 class CheckResult(BaseModel):
@@ -7,7 +8,9 @@ class CheckResult(BaseModel):
     passed: bool
     detail: str = ""
 
+
 # Entrenamiento
+
 
 class IntegrationReport(BaseModel):
     model_name: str
@@ -19,6 +22,7 @@ class IntegrationReport(BaseModel):
 
 # API
 
+
 class LoadedModel(BaseModel):
     pipeline: Any
     name: str
@@ -28,11 +32,12 @@ class LoadedModel(BaseModel):
 class HealthResponse(BaseModel):
     code: int
     content: str
-    model_name: Optional[str] = None
-    model_version: Optional[str] = None
+    model_name: str | None = None
+    model_version: str | None = None
 
 
 # Predicciones
+
 
 class PredictionRequest(BaseModel):
     crim: float
@@ -78,6 +83,7 @@ class PredictionResponse(BaseModel):
 
 # Drift
 
+
 class FeatureDriftResult(BaseModel):
     feature: str
     statistic: float
@@ -88,13 +94,9 @@ class FeatureDriftResult(BaseModel):
 class DriftReport(BaseModel):
     drifted: bool
     threshold: float
-    per_feature: List[FeatureDriftResult]
+    per_feature: list[FeatureDriftResult]
     n_reference: int
     n_current: int
 
     def drifted_features(self) -> list[str]:
-        return [
-            r.feature
-            for r in self.per_feature
-            if r.drifted
-        ]
+        return [r.feature for r in self.per_feature if r.drifted]

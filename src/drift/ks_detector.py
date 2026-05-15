@@ -13,13 +13,14 @@ config = get_config()
 
 
 class KSDriftDetector(DriftDetector):
-
     def detect(self, reference: pd.DataFrame, current: pd.DataFrame) -> DriftReport:
         threshold = config.drift_ks_threshold
 
         logger.info(
             "Ejecutando detector de KS Drift con Referencia=%d filas, Actual=%d filas, KS Threshold=%.3f",
-            len(reference), len(current), threshold,
+            len(reference),
+            len(current),
+            threshold,
         )
 
         per_feature: list[FeatureDriftResult] = []
@@ -35,7 +36,9 @@ class KSDriftDetector(DriftDetector):
             if len(ref_values) < 2 or len(cur_values) < 2:
                 logger.warning(
                     "Feature '%s' con muy pocos datos no-NaN (Referente=%d, Actual=%d).",
-                    feature, len(ref_values), len(cur_values),
+                    feature,
+                    len(ref_values),
+                    len(cur_values),
                 )
                 continue
 
@@ -63,7 +66,8 @@ class KSDriftDetector(DriftDetector):
         if any_drifted:
             logger.warning(
                 "Drift detectado en %d features: %s",
-                len(report.drifted_features()), report.drifted_features(),
+                len(report.drifted_features()),
+                report.drifted_features(),
             )
         else:
             logger.info("No se ha detectado KS Drift")

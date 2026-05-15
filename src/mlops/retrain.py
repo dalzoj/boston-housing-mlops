@@ -29,7 +29,7 @@ def retrain() -> dict[str, Any]:
     # Registrar nuevo modelo y promoverlo a STAGING
     version = client.register_model(
         run_id=result["run_id"],
-        artifact_path="model",
+        name="model",
         model_name=MODEL_REGISTRY_NAME,
     )
     client.promote_to_staging(MODEL_REGISTRY_NAME, version.version)

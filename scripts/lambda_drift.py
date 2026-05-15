@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from src.core.config import get_config
 from src.core.logging import setup_logging
@@ -24,7 +24,7 @@ def main():
 
     # Descargar las predicciones diarias
     minio = MinioClient()
-    today = datetime.now(timezone.utc).strftime("%Y/%m/%d")
+    today = datetime.now(UTC).strftime("%Y/%m/%d")
     current_df = minio.download_jsons_as_dataframe(
         bucket=config.minio_bucket_prediction_logs,
         prefix=today,
@@ -47,7 +47,8 @@ def main():
     retrain_result = retrain()
     logger.info(
         "Modelo reentrenado: v%s con RMSE=%.4f",
-        retrain_result["new_version"], retrain_result["metrics"]["rmse"],
+        retrain_result["new_version"],
+        retrain_result["metrics"]["rmse"],
     )
 
     # Validar y promover

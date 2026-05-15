@@ -1,16 +1,14 @@
-import yaml
 import threading
 from pathlib import Path
 
+import yaml
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
 
 _lock = threading.Lock()
 _instance: "AppConfig | None" = None
 
 
 class AppConfig(BaseSettings):
-
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
@@ -45,7 +43,7 @@ class AppConfig(BaseSettings):
 
 
 def _load_yaml() -> dict:
-    with open("config/config.yml", "r") as f:
+    with open("config/config.yml") as f:
         return yaml.safe_load(f)
 
 

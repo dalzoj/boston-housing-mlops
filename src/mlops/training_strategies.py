@@ -36,7 +36,7 @@ def inherit_strategy(df: pd.DataFrame, experiment_id: str) -> list[dict[str, Any
     logger.info("Heredando de v%s: model=%s, params=%s", prod.version, model_name, hyperparams)
 
     # Guardar hiperparámetros en YAML temporalmente
-    inherited_yaml = _dump_inherited_yaml(model_name, hyperparams, prod.version)
+    inherited_yaml = _dump_inherited_yaml(model_name, hyperparams)
 
     result = train_and_log(
         model_name=model_name,
@@ -52,7 +52,7 @@ def inherit_strategy(df: pd.DataFrame, experiment_id: str) -> list[dict[str, Any
     return [result]
 
 
-def _dump_inherited_yaml(model_name: str, hyperparams: dict, parent_version: str) -> Path:
+def _dump_inherited_yaml(model_name: str, hyperparams: dict) -> Path:
 
     path = Path(tempfile.gettempdir()) / "inherited_params.yml"
     content = {"models": {model_name: hyperparams}}
@@ -86,13 +86,21 @@ def search_strategy(df: pd.DataFrame, experiment_id: str) -> list[dict[str, Any]
 
     logger.info(
         "Estrategia search: %d modelos, %d trials, seed=%d",
-        len(hiperparams_config["models"]), hiperparams_config["n_trials"], hiperparams_config["seed"],
+        len(hiperparams_config["models"]),
+        hiperparams_config["n_trials"],
+        hiperparams_config["seed"],
     )
     optuna.logging.set_verbosity(optuna.logging.WARNING)
 
     results = []
     for model_name, space in hiperparams_config["models"].items():
-        best_params = _run_optuna(model_name, space, df, hiperparams_config["n_trials"], hiperparams_config["seed"])
+        best_params = _run_optuna(
+            model_name,
+            space,
+            df,
+            hiperparams_config["n_trials"],
+            hiperparams_config["seed"],
+        )
         result = train_and_log(
             model_name=model_name,
             model_params=best_params,
@@ -125,7 +133,10 @@ def _run_optuna(model_name, space, df, n_trials, seed):
     )
     study.optimize(objective, n_trials=n_trials, show_progress_bar=False)
 
-    best = {**study.best_params, **{k: v["value"] for k, v in space.items() if v["type"] == "fixed"}}
+    best = {
+        **study.best_params,
+        **{k: v["value"] for k, v in space.items() if v["type"] == "fixed"},
+    }
     logger.info("Mejor %s: RMSE=%.4f, params=%s", model_name, study.best_value, best)
     return best
 

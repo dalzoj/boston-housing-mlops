@@ -1,19 +1,19 @@
-import uuid
 import logging
-from datetime import datetime, timezone
+import uuid
+from datetime import UTC, datetime
 
-from src.storage.minio_client import MinioClient
 from src.core.config import get_config
+from src.storage.minio_client import MinioClient
 
 logger = logging.getLogger(__name__)
 config = get_config()
 
+
 def log_prediction(features: dict, prediction: float, model_version: str) -> None:
     try:
-
         minio = MinioClient()
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         payload = {
             "timestamp": now.isoformat(),
             "model_version": model_version,

@@ -2,7 +2,7 @@ import logging
 import time
 
 import pandas as pd
-from fastapi import APIRouter, HTTPException, BackgroundTasks
+from fastapi import APIRouter, BackgroundTasks, HTTPException
 from fastapi.responses import Response
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 
@@ -15,6 +15,7 @@ from src.utils.utils import log_prediction
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
 
 @router.get("/health", response_model=HealthResponse)
 async def health() -> HealthResponse:
@@ -39,15 +40,14 @@ async def health() -> HealthResponse:
 
 @router.post("/predict", response_model=PredictionResponse)
 async def predict(
-    request: PredictionRequest,
-    background_tasks: BackgroundTasks
+    request: PredictionRequest, background_tasks: BackgroundTasks
 ) -> PredictionResponse:
     try:
         loaded = get_loaded_model()
     except Exception as e:
         prediction_errors.labels(error="model_not_loaded").inc()
         logger.error("No se pudo cargar el modelo: %s", e)
-        raise HTTPException(status_code=503, detail=str(e))
+        raise HTTPException(status_code=503, detail="model_not_loaded") from e
 
     row = {col: getattr(request, col) for col in FEATURE_COLUMNS}
     df = pd.DataFrame([row])
@@ -60,14 +60,13 @@ async def predict(
     except Exception as e:
         prediction_errors.labels(error="prediction_failed").inc()
         logger.exception("Prediction failed")
-        raise HTTPException(status_code=500, detail=f"Prediction failed: {e}")
+        raise HTTPException(status_code=500, detail="prediction_failed") from e
 
     finally:
         elapsed = time.perf_counter() - start
         prediction_latency.labels(model_version=loaded.version).observe(elapsed)
 
     background_tasks.add_task(log_prediction, row, prediction, loaded.version)
-
 
     prediction_counter.labels(
         model_name=loaded.name,
