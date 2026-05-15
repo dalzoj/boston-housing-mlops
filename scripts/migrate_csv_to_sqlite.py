@@ -1,14 +1,15 @@
 import logging
+import warnings
 import sqlite3
 import argparse
 from pathlib import Path
 
 import pandas as pd
-from sdv.metadata import Metadata
-from sdv.single_table import GaussianCopulaSynthesizer
+from copulas.multivariate import GaussianMultivariate
 
 from src.core.config import get_config
 from src.core.logging import setup_logging
+from src.data.schema import FEATURE_COLUMNS, TARGET_COLUMN
 
 
 logger = logging.getLogger(__name__)
@@ -79,16 +80,14 @@ def get_augmented_data(
     news_items: int,
 ) -> pd.DataFrame:
 
-    metadata = Metadata.detect_from_dataframe(df)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", RuntimeWarning)
+        model = GaussianMultivariate()
+        model.fit(df)
+        synthetic = model.sample(news_items)
 
-    synthesizer = GaussianCopulaSynthesizer(
-        metadata,
-        enforce_min_max_values=True,
-        enforce_rounding=True,
-    )
-    synthesizer.fit(df)
-
-    synthetic = synthesizer.sample(num_rows=news_items)
+    for col in FEATURE_COLUMNS + [TARGET_COLUMN]:
+        synthetic[col] = synthetic[col].clip(lower=df[col].min(), upper=df[col].max())
 
     logger.info("Data Augmentation: %d filas sintéticas generadas.", news_items)
     return synthetic
@@ -114,6 +113,7 @@ def main() -> None:
     if check_csv_file(csv_path):
         df = load_csv(csv_path)
         df = drop_nulls(df)
+        df.columns = df.columns.str.lower()
 
         if args.new_elements > 0:
 
