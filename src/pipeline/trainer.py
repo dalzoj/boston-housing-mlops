@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 from typing import Any
 
 import mlflow
@@ -42,6 +43,8 @@ def train_and_log(
     model_params: dict[str, Any],
     df: pd.DataFrame,
     experiment_id: str,
+    extra_params: dict[str, Any] | None = None,
+    extra_artifacts: list[Path] | None = None,
 ) -> dict[str, Any]:
     logger.info("Entrenando %s con parámetros=%s", model_name, model_params)
 
@@ -56,6 +59,9 @@ def train_and_log(
         mlflow.log_params(model_params)
         mlflow.log_param("random_state", RANDOM_STATE)
         mlflow.log_param("test_size", TEST_SIZE)
+
+        if extra_params:
+            mlflow.log_params(extra_params)
 
         pipeline.fit(X_train, y_train)
 
@@ -72,6 +78,10 @@ def train_and_log(
             input_example=X_train.iloc[:3],
             signature=signature,
         )
+
+        if extra_artifacts:
+            for path in extra_artifacts:
+                mlflow.log_artifact(str(path))
 
         run_id = run.info.run_id
 
