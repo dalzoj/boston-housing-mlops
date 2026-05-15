@@ -27,8 +27,21 @@ prometheus-client = "^0.25.0"
 scipy = "^1.17.1"
 optuna = "^4.8.0"
 copulas = "^0.14.1"
+pytest = "^9.0.3"
+httpx = "^0.28.1"
+ruff = "^0.15.13"
+black = "^26.3.1"
 
 [dependency-groups]
 dev = [
     "ipykernel (>=7.2.0,<8.0.0)"
 ]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["notebooks", ".venv"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501"]
